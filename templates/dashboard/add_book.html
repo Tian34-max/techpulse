@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}Add Book{% endblock %}
+
+{% block content %}
+  <div class="container py-5">
+    <h1 class="display-5 fw-bold mb-4 text-center">Add New Book</h1>
+
+    {% if messages %}
+      {% for message in messages %}
+        <div class="alert {% if message.tags == 'error' %}alert-danger{% else %}alert-success{% endif %}">
+          {{ message }}
+        </div>
+      {% endfor %}
+    {% endif %}
+
+    <div class="card shadow-lg mx-auto" style="max-width: 600px;">
+      <div class="card-body p-5">
+        <form method="post">
+          {% csrf_token %}
+          {{ form.as_p }}
+          <button type="submit" class="btn btn-primary btn-lg w-100 mt-3">Add Book</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="text-center mt-4">
+      <!-- Fixed redirect - using hardcoded path until URL is confirmed -->
+      <a href="/students/librarian/" class="btn btn-outline-secondary">Back to Dashboard</a>
+    </div>
+  </div>
+{% endblock %}

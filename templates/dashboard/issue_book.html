@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+
+{% block title %}Issue Books{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <h1 class="display-5 fw-bold mb-4 text-center">Issue Books</h1>
+
+  <form method="post" id="issueForm">
+    {% csrf_token %}
+
+    <!-- Student -->
+    <div class="card shadow mb-4">
+      <div class="card-header bg-primary text-white">
+        <h5 class="mb-0">1. Select Student</h5>
+      </div>
+      <div class="card-body">
+        <select name="student_id" class="form-select form-select-lg" required>
+          <option value="">-- Select student --</option>
+          {% for student in students %}
+            <option value="{{ student.id }}">
+              {{ student.name }} • {{ student.student_id|default:"No ID" }} • {{ student.class_group.name|default:"No class" }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+
+    <!-- Books + Quantity -->
+    <div class="card shadow mb-4">
+      <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">2. Select Books & Quantities</h5>
+        <div class="input-group input-group-sm" style="width: 300px;">
+          <input type="text" id="bookSearch" class="form-control" placeholder="Search books...">
+          <button class="btn btn-outline-light" type="button" onclick="document.getElementById('bookSearch').value = ''">Clear</button>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="row g-3" id="bookList">
+          {% for book in books %}
+            <div class="col-12 col-md-6 col-lg-4 book-item">
+              <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                  <h6 class="card-title mb-1">{{ book.title }}</h6>
+                  <p class="card-text text-muted small mb-2">{{ book.author|default:"Unknown" }}</p>
+                  <div class="d-flex justify-content-between mb-3">
+                    <span class="badge bg-info">Available: {{ book.available }}</span>
+                    {% if book.category %}
+                      <span class="badge bg-secondary">{{ book.category }}</span>
+                    {% endif %}
+                  </div>
+
+                  <div class="d-flex align-items-center gap-3">
+                    <div class="form-check">
+                      <input class="form-check-input book-checkbox" type="checkbox" 
+                             name="book_ids" value="{{ book.id }}" id="book{{ book.id }}">
+                      <label class="form-check-label" for="book{{ book.id }}"></label>
+                    </div>
+
+                    <div class="input-group input-group-sm" style="width: 140px;">
+                      <span class="input-group-text">Qty</span>
+                      <input type="number" name="qty_{{ book.id }}" class="form-control quantity-input" 
+                             min="0" max="{{ book.available }}" value="0" disabled>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          {% empty %}
+            <div class="col-12 text-center py-5 text-muted">
+              No books currently available
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Due Date & Submit -->
+    <div class="card shadow mb-4">
+      <div class="card-header bg-info text-white">
+        <h5 class="mb-0">3. Set Due Date & Submit</h5>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label for="due_date" class="form-label fw-bold">Due Date</label>
+            <input type="date" name="due_date" id="due_date" class="form-control form-control-lg" required>
+          </div>
+          <div class="col-md-6 mb-3 d-flex align-items-end">
+            <div>
+              <label class="form-label fw-bold">Selected</label>
+              <div id="selectedCount" class="fs-4 fw-bold text-success">0 copies selected</div>
+            </div>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-success btn-lg w-100" id="submitBtn" disabled>
+          <i class="fas fa-check-circle me-2"></i> Issue Selected Copies
+        </button>
+      </div>
+    </div>
+  </form>
+</div>
+
+<script>
+  // Enable/disable quantity input when checkbox is toggled
+  document.querySelectorAll('.book-checkbox').forEach(checkbox => {
+    const qtyInput = checkbox.closest('.card-body').querySelector('.quantity-input');
+
+    checkbox.addEventListener('change', () => {
+      qtyInput.disabled = !checkbox.checked;
+      if (!checkbox.checked) qtyInput.value = 0;
+      updateSummary();
+    });
+
+    qtyInput.addEventListener('input', () => {
+      let val = parseInt(qtyInput.value) || 0;
+      if (val > parseInt(qtyInput.max)) val = qtyInput.max;
+      if (val < 0) val = 0;
+      qtyInput.value = val;
+      updateSummary();
+    });
+  });
+
+  function updateSummary() {
+    let total = 0;
+    document.querySelectorAll('.book-checkbox:checked').forEach(cb => {
+      const qty = parseInt(cb.closest('.card-body').querySelector('.quantity-input').value) || 0;
+      total += qty;
+    });
+
+    document.getElementById('selectedCount').textContent = `${total} cop${total === 1 ? 'y' : 'ies'} selected`;
+    document.getElementById('submitBtn').disabled = total === 0;
+  }
+
+  // Live search for books
+  document.getElementById('bookSearch').addEventListener('input', function() {
+    const term = this.value.toLowerCase();
+    document.querySelectorAll('.book-item').forEach(item => {
+      const title = item.querySelector('.card-title').textContent.toLowerCase();
+      item.style.display = title.includes(term) ? '' : 'none';
+    });
+  });
+
+  // Initial update
+  updateSummary();
+</script>
+{% endblock %}

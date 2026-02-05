@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}Book Search{% endblock %}
+
+{% block content %}
+  <h1 class="mb-4">Book Search</h1>
+
+  <form method="get" class="mb-5">
+    <div class="input-group input-group-lg">
+      <input type="text" name="q" class="form-control" placeholder="Search by title, author or ISBN..." value="{{ query }}">
+      <button class="btn btn-primary" type="submit">Search</button>
+    </div>
+  </form>
+
+  {% if books %}
+    <p class="mb-4">Found {{ books.count }} book{{ books.count|pluralize }}.</p>
+
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+      {% for book in books %}
+        <div class="col">
+          <div class="card h-100 shadow-sm">
+            <div class="card-body">
+              <h5 class="card-title">{{ book.title }}</h5>
+              <h6 class="card-subtitle mb-2 text-muted">By {{ book.author|default:"Unknown" }}</h6>
+              <p class="card-text">
+                ISBN: {{ book.isbn|default:"N/A" }}<br>
+                Category: {{ book.category.name|default:"Uncategorized" }}<br>
+                Available: {{ book.available }} / {{ book.total_copies }}
+              </p>
+              <span class="badge {% if book.available > 0 %}bg-success{% else %}bg-danger{% endif %}">
+                {% if book.available > 0 %}Available{% else %}Out of Stock{% endif %}
+              </span>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="alert alert-info">
+      No books found matching your search.
+    </div>
+  {% endif %}
+{% endblock %}

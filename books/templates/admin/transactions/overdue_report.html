@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}Overdue Report{% endblock %}
+
+{% block content %}
+  <h1 class="mb-4">Overdue Borrow Report</h1>
+
+  <div class="row mb-4">
+    <div class="col-md-6">
+      <div class="card shadow-sm border-danger">
+        <div class="card-body text-center">
+          <h5>Total Overdue</h5>
+          <h2 class="text-danger">{{ total_overdue }}</h2>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="card shadow-sm border-warning">
+        <div class="card-body text-center">
+          <h5>Total Estimated Fine</h5>
+          <h2 class="text-warning">{{ total_fine }} UGX</h2>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% if overdue %}
+    <table class="table table-striped table-hover">
+      <thead>
+        <tr>
+          <th>Student</th>
+          <th>Book</th>
+          <th>Due Date</th>
+          <th>Days Overdue</th>
+          <th>Fine (UGX)</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for borrow in overdue %}
+          <tr>
+            <td>{{ borrow.student }}</td>
+            <td>{{ borrow.book }}</td>
+            <td>{{ borrow.due_date }}</td>
+            <td>{{ borrow.days_overdue }}</td>
+            <td>{{ borrow.calculate_fine }}</td>
+            <td><span class="badge bg-danger">{{ borrow.status }}</span></td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <div class="alert alert-success">No overdue books at the moment.</div>
+  {% endif %}
+{% endblock %}

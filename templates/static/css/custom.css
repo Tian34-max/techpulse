@@ -1,0 +1,40 @@
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #14c073;
+}
+
+.navbar-brand {
+  font-size: 1.6rem;
+  font-weight: bold;
+}
+
+.card {
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+}
+
+.btn-primary {
+  background-color: #1d4ed8;
+  border-color: #1d4ed8;
+}
+
+.btn-primary:hover {
+  background-color: #1e40af;
+}
+
+.overdue-badge {
+  background-color: #fee2e2;
+  color: #991b1b;
+  font-weight: bold;
+}
+
+.fine-badge {
+  background-color: #139c71;
+  color: #92400e;
+}

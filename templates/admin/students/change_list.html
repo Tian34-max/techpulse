@@ -1,0 +1,10 @@
+{% extends "admin/change_list.html" %}
+
+{% block footer %}
+  {{ block.super }}
+  <div style="margin-top: 30px; text-align: center; padding: 20px; background: #f8f9fa; border-top: 1px solid #ddd;">
+    <a href="{{ batch_import_url }}" class="button addlink" style="font-size: 16px; padding: 10px 20px;">
+      <i class="fas fa-upload"></i> Batch Import Students
+    </a>
+  </div>
+{% endblock %}

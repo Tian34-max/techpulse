@@ -1,0 +1,258 @@
+{% extends "base.html" %}
+
+{% block title %}Librarian Dashboard{% endblock %}
+
+{% block content %}
+<div class="d-flex min-vh-100">
+  <!-- Sidebar - always visible -->
+  <aside class="bg-dark text-white p-4" style="width: 260px; flex-shrink: 0; overflow-y: auto; height: 100vh; position: sticky; top: 0;">
+    <div class="logo fs-3 fw-bold text-primary mb-5">Techpulse</div>
+    <ul class="nav flex-column gap-2">
+      <li class="nav-item">
+        <a class="nav-link active text-white py-3 px-4 rounded" href="{% url 'students:librarian_dashboard' %}">
+          <i class="fas fa-home me-3 fs-5"></i> Dashboard
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link text-white py-3 px-4 rounded" href="{% url 'students:student_list' %}">
+          <i class="fas fa-users me-3 fs-5"></i> Students
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link text-white py-3 px-4 rounded" href="{% url 'students:class_lists_overview' %}">
+          <i class="fas fa-list-ul me-3 fs-5"></i> Class Lists
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link text-white py-3 px-4 rounded" href="{% url 'students:library_stock' %}">
+          <i class="fas fa-boxes-stacked me-3 fs-5"></i> Library Stock
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link text-white py-3 px-4 rounded" href="{% url 'students:add_book' %}">
+          <i class="fas fa-book-medical me-3 fs-5"></i> Add Book
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link text-white py-3 px-4 rounded" href="{% url 'students:issue_book' %}">
+          <i class="fas fa-handshake me-3 fs-5"></i> Issue Book
+        </a>
+      </li>
+      <li class="nav-item">
+  <a class="nav-link text-white py-3 px-4 rounded" href="{% url 'students:import_students' %}">
+    <i class="fas fa-file-import me-3 fs-5"></i> Import Students
+  </a>
+</li>
+      <li class="nav-item">
+        <a class="nav-link text-white py-3 px-4 rounded" href="{% url 'students:returns_list' %}">
+          <i class="fas fa-undo-alt me-3 fs-5"></i> Returns
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link text-white py-3 px-4 rounded" href="{% url 'students:reports_overview' %}">
+          <i class="fas fa-chart-bar me-3 fs-5"></i> Reports
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link text-white py-3 px-4 rounded" href="{% url 'students:librarian_settings' %}">
+          <i class="fas fa-cog me-3 fs-5"></i> Settings
+        </a>
+      </li>
+    </ul>
+  </aside>
+
+  <!-- Main Content -->
+  <div class="flex-grow-1 bg-dark text-white">
+    <header class="bg-black py-3 px-4 d-flex justify-content-between align-items-center shadow-sm">
+      <div>
+        <h4 class="mb-0">Librarian Dashboard</h4>
+        <small class="text-muted">
+          Managing: <strong class="text-primary">{{ school.name|default:"No school assigned" }}</strong>
+          {% if school.short_name %}
+            ({{ school.short_name }})
+          {% endif %}
+        </small>
+      </div>
+      <div class="d-flex align-items-center gap-4">
+        <i class="fas fa-bell fs-4 cursor-pointer"></i>
+        <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width:44px;height:44px;">
+          {{ request.user.username|slice:":2"|upper }}
+        </div>
+      </div>
+    </header>
+
+    <div class="container-fluid py-5 px-3 px-md-5">
+      <!-- Stats Cards -->
+      <div class="row g-4 mb-5">
+        <div class="col-6 col-md-6 col-lg-3">
+          <div class="card bg-secondary text-white shadow h-100">
+            <div class="card-body text-center">
+              <i class="fas fa-users fa-2x text-primary mb-3"></i>
+              <h5 class="card-title">Total Students</h5>
+              <h3 class="fw-bold">{{ total_students }}</h3>
+              <small class="text-success">+{{ monthly_student_growth|default:0 }} this month</small>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-6 col-md-6 col-lg-3">
+          <div class="card bg-secondary text-white shadow h-100">
+            <div class="card-body text-center">
+              <i class="fas fa-book-open fa-2x text-success mb-3"></i>
+              <h5 class="card-title">Available Books</h5>
+              <h3 class="fw-bold">{{ available_books|length }}</h3>
+              <small class="text-success">+{{ low_stock_count|default:0 }} low stock</small>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-6 col-md-6 col-lg-3">
+          <div class="card bg-secondary text-white shadow h-100">
+            <div class="card-body text-center">
+              <i class="fas fa-handshake fa-2x text-warning mb-3"></i>
+              <h5 class="card-title">Issued Books</h5>
+              <h3 class="fw-bold">{{ total_borrowed }}</h3>
+              <small class="text-muted">{{ today_issued|default:0 }} today</small>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-6 col-md-6 col-lg-3">
+          <div class="card bg-secondary text-white shadow h-100">
+            <div class="card-body text-center">
+              <i class="fas fa-exclamation-triangle fa-2x text-danger mb-3"></i>
+              <h5 class="card-title">Overdue</h5>
+              <h3 class="fw-bold">{{ overdue_count }}</h3>
+              <small class="text-danger">Urgent attention</small>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Progress & Charts -->
+      <div class="row g-4 mb-5">
+        <div class="col-lg-6">
+          <div class="card bg-secondary text-white shadow h-100">
+            <div class="card-body text-center">
+              <h5 class="card-title mb-4">On-time Returns</h5>
+              <div class="position-relative mx-auto" style="width:180px;height:180px;">
+                <div class="position-absolute top-50 start-50 translate-middle text-center">
+                  <h2 class="fw-bold mb-0">{{ on_time_percentage|default:77 }}%</h2>
+                  <small class="text-muted">This month</small>
+                </div>
+                <svg viewBox="0 0 36 36" class="w-100 h-100">
+                  <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#374151" stroke-width="4" />
+                  <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="#6366f1" stroke-width="4" stroke-dasharray="{{ on_time_percentage|default:77 }}, 100" />
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-6">
+          <div class="card bg-secondary text-white shadow h-100">
+            <div class="card-body">
+              <h5 class="card-title mb-4">Weekly Borrowings</h5>
+              <div class="d-flex justify-content-between align-items-end" style="height:220px;">
+                {% for count, height in weekly_data_pairs %}
+                  <div class="text-center flex-fill">
+                    <div class="bg-primary rounded-top mx-auto" style="width:35px; height:{{ height }}%;"></div>
+                    <small>
+                      {% if forloop.counter0 == 0 %}Mon{% elif forloop.counter0 == 1 %}Tue{% elif forloop.counter0 == 2 %}Wed{% elif forloop.counter0 == 3 %}Thu{% elif forloop.counter0 == 4 %}Fri{% elif forloop.counter0 == 5 %}Sat{% else %}Sun{% endif %}
+                    </small>
+                    <div class="small text-muted">{{ count }}</div>
+                  </div>
+                {% empty %}
+                  <div class="text-center w-100 text-muted py-5">No borrowings this week</div>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Activity -->
+      <div class="card bg-secondary text-white shadow mb-5">
+        <div class="card-header bg-black border-bottom border-dark">
+          <h5 class="mb-0">Recent Activity</h5>
+        </div>
+        <div class="card-body p-0">
+          <div class="list-group list-group-flush">
+            {% for borrow in borrowed_books %}
+              <div class="list-group-item bg-transparent border-bottom border-dark text-white">
+                <div class="d-flex align-items-center">
+                  <div class="bg-primary rounded-circle p-3 me-3">
+                    <i class="fas fa-book"></i>
+                  </div>
+                  <div class="flex-grow-1">
+                    <strong>{{ borrow.student.name }}</strong> issued <strong>{{ borrow.book.title }}</strong>
+                    <div class="small text-muted">{{ borrow.issued_date }} • Due: {{ borrow.due_date }}</div>
+                  </div>
+                  <div>
+                    {% if borrow.status == 'OVERDUE' %}
+                      <span class="badge bg-danger">Overdue</span>
+                    {% else %}
+                      <span class="badge bg-primary">Active</span>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+            {% empty %}
+              <div class="text-center py-5 text-muted">
+                No recent activity
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="text-center mt-5">
+        <a href="{% url 'students:add_book' %}" class="btn btn-lg btn-primary me-3 mb-3 shadow">
+          <i class="fas fa-book-medical me-2"></i> Add Book
+        </a>
+        <a href="{% url 'students:issue_book' %}?next={% url 'students:librarian_dashboard' %}" class="btn btn-lg btn-success me-3 mb-3 shadow">
+          <i class="fas fa-handshake me-2"></i> Issue Book
+        </a>
+        <a href="{% url 'students:student_search' %}" class="btn btn-lg btn-info mb-3 shadow">
+          <i class="fas fa-search me-2"></i> Search Students
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  :root {
+    --sidebar-bg: #1a1f36;
+    --primary: #6366f1;
+    --card-bg: #ba1d22;
+    --text: #e2e8f0;
+    --gray: #94a3b8;
+    --green: #10b981;
+    --red: #ef4444;
+    --yellow: #f59e0b;
+    --border: #374151;
+  }
+
+  .sidebar { background: var(--sidebar-bg); width: 260px; flex-shrink: 0; overflow-y: auto; height: 100vh; position: sticky; top: 0; }
+  .logo { font-size: 2rem; font-weight: bold; color: var(--primary); margin-bottom: 2.5rem; }
+  .nav-link { display: flex; align-items: center; gap: 12px; padding: 1rem 1.2rem; color: var(--gray); text-decoration: none; border-radius: 8px; margin: 0.5rem 0; transition: all 0.2s; }
+  .nav-link:hover, .nav-link.active { background: rgba(99,102,241,0.15); color: white; }
+  header { background: #bac5db; border-bottom: 1px solid var(--border); padding: 1.2rem 2.5rem; }
+  .content { padding: 2.5rem; background: #0f172a; flex-grow: 1; }
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 2.5rem; }
+  .stat-card { background: var(--card-bg); border-radius: 16px; padding: 1.8rem; border: 1px solid var(--border); transition: transform 0.3s; }
+  .stat-card:hover { transform: translateY(-6px); }
+  .stat-number { font-size: 2.6rem; font-weight: 700; }
+  .progress-section { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2rem; margin-bottom: 2.5rem; }
+  .circular-progress { width: 180px; height: 180px; border-radius: 50%; margin: 0 auto 1rem; background: conic-gradient(var(--primary) 0% 77%, var(--border) 77% 100%); display: flex; align-items: center; justify-content: center; }
+  .progress-inner { width: 140px; height: 140px; background: var(--card-bg); border-radius: 50%; text-align: center; display: flex; flex-direction: column; justify-content: center; }
+  .progress-value { font-size: 2.8rem; font-weight: 700; }
+  .bar-chart { display: flex; align-items: flex-end; gap: 0.8rem; height: 220px; }
+  .bar { width: 40px; background: var(--primary); border-radius: 8px 8px 0 0; }
+  .activity-card { background: var(--card-bg); border-radius: 16px; padding: 1.8rem; border: 1px solid var(--border); }
+  .quick-actions { margin-top: 2.5rem; text-align: center; }
+  .btn { padding: 1rem 2rem; border-radius: 12px; font-weight: 600; margin: 0 0.8rem; transition: all 0.2s; display: inline-block; }
+</style>
+{% endblock %}

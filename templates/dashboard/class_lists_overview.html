@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <h1 class="display-5 fw-bold mb-4">{{ title }}</h1>
+
+  <div class="row g-4">
+    {% for item in class_summaries %}
+      <div class="col-md-6 col-lg-4">
+        <div class="card shadow-sm h-100">
+          <div class="card-body">
+            <h5 class="card-title text-primary">{{ item.class_group.name }}</h5>
+            <p class="card-text">
+              <strong>Total Students:</strong> {{ item.total_students }}<br>
+              <strong>Students with Books:</strong> {{ item.borrower_count }}<br>
+              <strong>Active Borrows:</strong> {{ item.active_borrows }}<br>
+              <strong>Overdue:</strong> 
+              {% if item.overdue %}
+                <span class="text-danger fw-bold">{{ item.overdue }}</span>
+              {% else %}
+                0
+              {% endif %}
+            </p>
+            <a href="{% url 'students:class_detail' item.class_group.id %}" class="btn btn-primary">
+              View Class List
+            </a>
+          </div>
+        </div>
+      </div>
+    {% empty %}
+      <div class="col-12">
+        <div class="alert alert-info text-center">
+          No classes found in your school.
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+
+  <div class="text-center mt-5">
+    <a href="{% url 'students:librarian_dashboard' %}" class="btn btn-outline-secondary">
+      Back to Dashboard
+    </a>
+  </div>
+</div>
+{% endblock %}

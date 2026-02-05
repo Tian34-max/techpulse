@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <h1 class="display-5 fw-bold mb-4">{{ title }}</h1>
+
+  <div class="card shadow mb-5">
+    <div class="card-header bg-primary text-white">
+      <h5 class="mb-0">Students in {{ class_group.name }}</h5>
+    </div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead class="table-dark">
+            <tr>
+              <th>#</th>
+              <th>Name</th>
+              <th>Student ID</th>
+              <th>Has Borrowed</th>
+              <th>Active Books</th>
+              <th>Overdue</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for student in students %}
+              <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ student.name }}</td>
+                <td>{{ student.student_id|default:"—" }}</td>
+                <td>
+                  {% if student.has_borrowed %}
+                    <span class="badge bg-success">Yes</span>
+                  {% else %}
+                    <span class="badge bg-secondary">No</span>
+                  {% endif %}
+                </td>
+                <td>{{ student.active_borrows }}</td>
+                <td>
+                  {% if student.overdue_count %}
+                    <span class="badge bg-danger">{{ student.overdue_count }}</span>
+                  {% else %}
+                    0
+                  {% endif %}
+                </td>
+                <td>
+                  <a href="{% url 'students:issue_book' %}?student_id={{ student.id }}" class="btn btn-sm btn-primary">
+                    <i class="fas fa-handshake"></i> Issue Book
+                  </a>
+                </td>
+              </tr>
+            {% empty %}
+              <tr>
+                <td colspan="7" class="text-center py-4 text-muted">No students in this class</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+          <td>
+  {% if student.active_borrows > 0 %}
+    <a href="{% url 'students:returns_list' %}" class="btn btn-sm btn-warning">
+      View & Return
+    </a>
+  {% endif %}
+</td>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="text-center">
+    <a href="{% url 'students:class_lists_overview' %}" class="btn btn-outline-secondary me-3">
+      Back to Class Lists
+    </a>
+    <a href="{% url 'students:librarian_dashboard' %}" class="btn btn-outline-secondary">
+      Back to Dashboard
+    </a>
+  </div>
+</div>
+{% endblock %}

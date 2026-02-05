@@ -1,0 +1,100 @@
+{% extends "admin/base_site.html" %}
+
+{% block content_title %}
+<h1>Batch Import Students</h1>
+{% endblock %}
+
+{% block content %}
+<div id="content-main">
+  <p>
+    Upload a CSV file with at least <strong>student_id</strong> and <strong>name</strong> columns.<br>
+    All students will be assigned to the selected school and class group.<br>
+    Optional columns: gender, roll_number, email, phone, admission_date, is_active
+  </p>
+
+  <p><strong>Example CSV:</strong></p>
+  <pre style="background:#f8f9fa; padding:15px; border:1px solid #ddd;">
+student_id,name,gender,roll_number,email,phone,admission_date,is_active
+S001,John Kizza,M,001,john@example.com,+256772123456,2025-01-15,True
+S002,Mary Nakato,F,002,mary@example.com,+256701234567,2025-01-16,True
+  </pre>
+
+  <form method="post" enctype="multipart/form-data" id="batch-import-form">
+    {% csrf_token %}
+
+    <fieldset class="module aligned">
+      <div class="form-row">
+        <div>
+          <label for="school"><strong>School:</strong></label>
+          <select name="school" id="school" required>
+            <option value="">--- Select school ---</option>
+            {% for s in schools %}
+              <option value="{{ s.id }}">{{ s.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div>
+          <label for="class_group"><strong>Class Group:</strong></label>
+          <select name="class_group" id="class_group" required>
+            <option value="">--- Select class ---</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div>
+          <label for="csv_file"><strong>CSV File:</strong></label>
+          <input type="file" name="csv_file" accept=".csv" required>
+        </div>
+      </div>
+    </fieldset>
+
+    <div style="margin-top:20px;">
+      <input type="submit" value="Validate & Import" class="button" />
+    </div>
+  </form>
+
+  <!-- JavaScript for dynamic class group loading -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script>
+    $(document).ready(function() {
+      $('#school').change(function() {
+        var schoolId = $(this).val();
+        var csrfToken = '{{ csrf_token }}';
+
+        $('#class_group').html('<option value="">Loading classes...</option>');
+
+        if (schoolId) {
+          $.ajax({
+            url: '{% url "admin:student_get_classes" %}',
+            type: 'POST',
+            data: {
+              school_id: schoolId,
+              csrfmiddlewaretoken: csrfToken
+            },
+            success: function(data) {
+              console.log("Success:", data);
+              $('#class_group').html('<option value="">--- Select class ---</option>');
+              if (data.classes && data.classes.length > 0) {
+                data.classes.forEach(function(cls) {
+                  $('#class_group').append('<option value="' + cls.id + '">' + cls.name + '</option>');
+                });
+              } else {
+                $('#class_group').append('<option value="">No classes found</option>');
+              }
+            },
+            error: function(xhr, status, error) {
+              console.log("AJAX error:", status, error, xhr.responseText);
+              $('#class_group').html('<option value="">Error loading classes</option>');
+            }
+          });
+        } else {
+          $('#class_group').html('<option value="">--- Select class ---</option>');
+        }
+      });
+    });
+  </script>
+{% endblock %}

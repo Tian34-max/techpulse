@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <h1 class="display-5 fw-bold mb-4">{{ title }}</h1>
+
+  <!-- Summary -->
+  <div class="row g-4 mb-5">
+    <div class="col-md-3">
+      <div class="card text-center shadow-sm border-primary">
+        <div class="card-body">
+          <h5 class="card-title text-primary">Total Students</h5>
+          <h2 class="fw-bold">{{ total_students }}</h2>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card text-center shadow-sm border-success">
+        <div class="card-body">
+          <h5 class="card-title text-success">Total Books</h5>
+          <h2 class="fw-bold">{{ total_books }}</h2>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card text-center shadow-sm border-warning">
+        <div class="card-body">
+          <h5 class="card-title text-warning">Currently Borrowed</h5>
+          <h2 class="fw-bold">{{ total_borrowed }}</h2>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card text-center shadow-sm border-danger">
+        <div class="card-body">
+          <h5 class="card-title text-danger">Overdue</h5>
+          <h2 class="fw-bold">{{ overdue_count }}</h2>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- On-time Returns -->
+  <div class="row mb-5">
+    <div class="col-12 col-lg-6">
+      <div class="card shadow-sm text-center">
+        <div class="card-body">
+          <h5>On-time Returns Rate</h5>
+          <div class="display-4 fw-bold text-primary">{{ on_time_percentage }}%</div>
+          <small class="text-muted">Based on all returned books</small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Class-by-Class Breakdown -->
+  <h3 class="mb-4">Borrowing Activity by Class</h3>
+  <div class="accordion" id="classAccordion">
+    {% for class_item in class_data %}
+      <div class="accordion-item">
+        <h2 class="accordion-header" id="heading{{ forloop.counter }}">
+          <button class="accordion-button {% if forloop.first %}collapsed{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ forloop.counter }}" aria-expanded="{% if forloop.first %}true{% else %}false{% endif %}" aria-controls="collapse{{ forloop.counter }}">
+            <strong>{{ class_item.class_group.name }}</strong>
+            <span class="badge bg-primary ms-3">{{ class_item.borrower_count }} borrowers</span>
+            {% if class_item.active_borrows %}
+              <span class="badge bg-info ms-2">{{ class_item.active_borrows }} active</span>
+            {% endif %}
+            {% if class_item.overdue_count %}
+              <span class="badge bg-danger ms-2">{{ class_item.overdue_count }} overdue</span>
+            {% endif %}
+          </button>
+        </h2>
+        <div id="collapse{{ forloop.counter }}" class="accordion-collapse collapse {% if forloop.first %}show{% endif %}" aria-labelledby="heading{{ forloop.counter }}" data-bs-parent="#classAccordion">
+          <div class="accordion-body">
+            {% if class_item.borrowers %}
+              <div class="table-responsive">
+                <table class="table table-hover">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Student ID</th>
+                      <th>Total Borrows</th>
+                      <th>Active</th>
+                      <th>Overdue</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for student in class_item.borrowers %}
+                      <tr>
+                        <td>{{ student.name }}</td>
+                        <td>{{ student.student_id|default:"—" }}</td>
+                        <td>{{ student.total_borrows }}</td>
+                        <td>{{ student.active_borrows }}</td>
+                        <td>
+                          {% if student.overdue_count %}
+                            <span class="badge bg-danger">{{ student.overdue_count }}</span>
+                          {% else %}
+                            <span class="badge bg-success">0</span>
+                          {% endif %}
+                        </td>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            {% else %}
+              <p class="text-muted text-center py-3">No students in this class have borrowed books.</p>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    {% empty %}
+      <div class="alert alert-info text-center">
+        No classes with borrowing activity yet.
+      </div>
+    {% endfor %}
+  </div>
+
+  <!-- Print Button -->
+  <div class="text-center mt-5">
+    <button onclick="window.print()" class="btn btn-lg btn-success shadow">
+      <i class="fas fa-print me-2"></i> Print All Class Lists
+    </button>
+  </div>
+</div>
+
+<style>
+  .accordion-button:not(.collapsed) { background-color: #6366f1; color: white; }
+  .accordion-button:focus { box-shadow: none; }
+  @media print {
+    .accordion-button, .no-print { display: none !important; }
+    .accordion-collapse { display: block !important; }
+    .page-break { page-break-after: always; }
+    body { background: white; color: black; }
+    .card { border: 1px solid #000; background: white !important; }
+  }
+</style>
+{% endblock %}

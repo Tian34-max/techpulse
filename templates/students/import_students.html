@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}Import Students{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <h1 class="mb-4">Import Students (Simple)</h1>
+
+  <div class="card shadow">
+    <div class="card-body">
+      <p class="lead">Upload a CSV file with these columns only:</p>
+      <pre class="bg-light p-3 rounded border">
+student_id,name,class_group
+S001,John Kizza,P7
+S002,Mary Nakato,S4 Science
+S003,David Okello,P6
+      </pre>
+
+      <p class="text-muted small">
+        • Required columns: student_id, name, class_group<br>
+        • Class group must already exist in the system<br>
+        • Any extra columns will be ignored<br>
+        • Duplicate student_id will be skipped
+      </p>
+
+      <hr>
+
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="mb-3">
+          <label for="csv_file" class="form-label fw-bold">Choose CSV file</label>
+          <input type="file" name="csv_file" class="form-control" accept=".csv" required>
+        </div>
+        <button type="submit" class="btn btn-primary btn-lg">
+          Upload & Import
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
